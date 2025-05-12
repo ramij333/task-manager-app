@@ -10,10 +10,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Register() {
   const router = useRouter();
-
+const { login } = useAuth();
   const {
     register,
     handleSubmit,
@@ -26,7 +27,10 @@ export default function Register() {
     try {
       const res = await API.post("/auth/register", data);
       localStorage.setItem("token", res.data.token);
+       login(JSON.stringify(res.data.user));
+       toast.success('Your account registerd successfully.')
       router.push("/");
+      
     } catch (err: any) {
       toast.error(err?.response?.data?.message || "Registration failed");
     }

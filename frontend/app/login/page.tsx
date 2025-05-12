@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Login() {
   const router = useRouter();
@@ -22,10 +23,13 @@ export default function Login() {
     resolver: zodResolver(loginSchema),
   });
 
+  const { login } = useAuth()
   const onSubmit = async (data: LoginSchema) => {
     try {
       const res = await API.post("/auth/login", data);
       localStorage.setItem("token", res.data.token);
+      login(JSON.stringify(res.data.user));
+      toast.success('Login successfull.')
       router.push("/");
     } catch (err: any) {
       toast.error(`${err?.response?.data?.message}` || "Login failed");
