@@ -5,12 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { registerSchema, RegisterSchema } from "@/schemas/register-schema";
 import { useRouter } from "next/navigation";
 import API from "../../services/api";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -52,11 +47,7 @@ export default function Register() {
               <Label htmlFor="name" className="text-base sm:text-lg">
                 Name
               </Label>
-              <Input
-                id="name"
-                placeholder="Your Name"
-                {...register("name")}
-              />
+              <Input id="name" placeholder="Your Name" {...register("name")} />
               {errors.name && (
                 <p className="text-sm text-red-500">{errors.name.message}</p>
               )}
@@ -90,7 +81,9 @@ export default function Register() {
                 {...register("password")}
               />
               {errors.password && (
-                <p className="text-sm text-red-500">{errors.password.message}</p>
+                <p className="text-sm text-red-500">
+                  {errors.password.message}
+                </p>
               )}
             </div>
 
@@ -102,11 +95,17 @@ export default function Register() {
               {isSubmitting ? "registering..." : "register"}
             </Button>
           </form>
+          <div className="mt-4 text-center text-sm text-muted-foreground">
+            Already have an account?{" "}
+            <a
+              href="/login"
+              className="text-primary underline hover:text-primary/80 transition-colors"
+            >
+              Login
+            </a>
+          </div>
         </CardContent>
       </Card>
     </div>
   );
 }
-
-
-

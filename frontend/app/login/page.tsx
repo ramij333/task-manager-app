@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -7,12 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, LoginSchema } from "@/schemas/login-schema";
 import { useRouter } from "next/navigation";
 import API from "../../services/api";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -50,7 +43,7 @@ export default function Login() {
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-base sm:text-lg">Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -62,7 +55,7 @@ export default function Login() {
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password" className="text-base sm:text-lg">Password</Label>
               <Input
                 id="password"
                 type="password"
@@ -70,7 +63,9 @@ export default function Login() {
                 {...register("password")}
               />
               {errors.password && (
-                <p className="text-sm text-red-600">{errors.password.message}</p>
+                <p className="text-sm text-red-600">
+                  {errors.password.message}
+                </p>
               )}
             </div>
             <Button
@@ -81,9 +76,17 @@ export default function Login() {
               {isSubmitting ? "Logging in..." : "Login"}
             </Button>
           </form>
+          <div className="mt-4 text-center text-sm text-muted-foreground">
+            Don’t have an account?{" "}
+            <a
+              href="/register"
+              className="text-primary underline hover:text-primary/80 transition-colors"
+            >
+              Register
+            </a>
+          </div>
         </CardContent>
       </Card>
     </div>
   );
 }
-

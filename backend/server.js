@@ -3,10 +3,10 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const connectDB = require("./config/db");
 
-// Load environment variables BEFORE using them
+
 dotenv.config();
 
-// Debug log to check if MONGO_URI is loading
+
 //console.log("Connecting to MongoDB URI:", process.env.MONGO_URI);
 
 const app = express();
@@ -20,6 +20,8 @@ connectDB();
 
 // Routes
 app.use("/api/auth", require("./routes/authRoutes"));
+app.use("/api/admin", require("./routes/adminRoutes"));
+app.use("/api/tasks", require("./routes/taskRoutes"));
 
 // Start server
 const PORT = process.env.PORT || 5000;
