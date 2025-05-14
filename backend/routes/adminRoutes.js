@@ -6,7 +6,7 @@ const router = express.Router();
 
 // Admin updates role of a user
 router.put(
-  "/users/:id/role",
+  "/:id/role",
   authenticate,
   authorize("admin"),
   async (req, res) => {
@@ -34,7 +34,7 @@ router.put(
   }
 );
 
-// GET /users/:id
+
 
 module.exports = router;
 

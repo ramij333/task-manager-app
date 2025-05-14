@@ -109,17 +109,18 @@ const { isLoggedIn, logout } = useAuth();
 
         {/* Middle: Create Task, Dashboard, and Search (Desktop) */}
         <div className="hidden  lg:flex items-center gap-10 mx-auto">
-          <a
-            href="/create-task"
-            className="text-md sm:text-lg font-medium text-gray-700 hover:text-blue-600"
-          >
-            Create Task
-          </a>
+          
           <a
             href="/dashboard"
             className="text-md sm:text-lg font-medium text-gray-700 hover:text-blue-600"
           >
             Dashboard
+          </a>
+          <a
+            href="/users"
+            className="text-md sm:text-lg font-medium text-gray-700 hover:text-blue-600"
+          >
+            All Users
           </a>
           <div className="relative">
             <Input
