@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const connectDB = require("./config/db");
+const cookieParser = require("cookie-parser")
 
 
 dotenv.config();
@@ -11,9 +12,20 @@ dotenv.config();
 
 const app = express();
 
+app.set('trust proxy', 1)
+
 // Middleware
-app.use(cors());
+app.use(cors({
+   origin: "http://localhost:3000",
+   methods: ["GET", "POST", "PUT", "DELETE"], 
+  credentials: true 
+}));
+app.use(cookieParser())
 app.use(express.json());
+
+app.get("/api/test", (req, res) => {
+  res.json({ message: "Hello from backend" });
+});
 
 // Connect to DB
 connectDB();
@@ -22,6 +34,7 @@ connectDB();
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/admin", require("./routes/adminRoutes"));
 app.use("/api/tasks", require("./routes/taskRoutes"));
+app.use("/api/users", require("./routes/userRoutes"))
 
 // Start server
 const PORT = process.env.PORT || 5000;

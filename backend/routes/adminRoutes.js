@@ -34,4 +34,9 @@ router.put(
   }
 );
 
+// GET /users/:id
+
 module.exports = router;
+
+
+

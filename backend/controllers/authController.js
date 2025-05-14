@@ -12,11 +12,32 @@ exports.register = async (req, res) => {
     const user = await User.create({ name, email, password: hashed });
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
-    res.json({ token, user: { id: user._id, name: user.name, email: user.email, role: user.role } });
+     res.json({
+  token, 
+  user: {
+    id: user._id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+  },
+});
+    
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "none",
+      maxAge: 24 * 60 * 60 * 1000, // 1 day,
+      path: "/"
+    });
+
+    res.status(201).json({
+      user: { id: user._id, name: user.name, email: user.email, role: user.role },
+    });
   } catch (err) {
     res.status(500).json({ message: "Server error" });
   }
 };
+
 
 exports.login = async (req, res) => {
   const { email, password } = req.body;
@@ -28,10 +49,32 @@ exports.login = async (req, res) => {
     if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
-    res.json({ token, user: { id: user._id, name: user.name, email: user.email, role: user.role } });
+
+    res.json({
+  token, 
+  user: {
+    id: user._id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+  },
+});
+   
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "none",
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
+      path: "/"
+    });
+
+    res.status(200).json({
+      user: { id: user._id, name: user.name, email: user.email, role: user.role },
+    });
   } catch (err) {
     res.status(500).json({ message: "Server error" });
   }
 };
+
 
 

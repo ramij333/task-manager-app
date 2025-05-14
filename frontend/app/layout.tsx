@@ -30,9 +30,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       ><AuthProvider>
-        <div className="absolute top-0 z-50 w-full"><Navbar /></div>
+        <div  className="absolute top-0 z-[9999] w-full"><Navbar /></div>
         {children}
-        <Toaster richColors  /></AuthProvider>
+        <Toaster expand={true} richColors  /></AuthProvider>
       </body>
     </html>
   );
