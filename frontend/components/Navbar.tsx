@@ -14,6 +14,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useAuth } from "@/contexts/AuthContext";
+import TaskSearchBar from "./TaskSearchBar";
 
 interface NavbarProps {
   logo?: {
@@ -122,7 +123,9 @@ const { isLoggedIn, logout } = useAuth();
           >
             All Users
           </a>
-          <div className="relative">
+          {/* <div className="relative">
+
+            
             <Input
               type="text"
               placeholder="Search"
@@ -131,7 +134,7 @@ const { isLoggedIn, logout } = useAuth();
             <span className="absolute  left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
               🔍
             </span>
-          </div>
+          </div> */}
         </div>
 
         {/* Right: Conditional Buttons (Login, Sign Up, Logout) */}

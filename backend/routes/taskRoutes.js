@@ -32,23 +32,58 @@ router.post("/", authenticate, async (req, res) => {
 });
 
 // Get Tasks for Current User (Creator or Assignee)
+
+
+
 router.get("/", authenticate, async (req, res) => {
   try {
-    const now = new Date();
+    const { status, priority, dueDate, search } = req.query;
 
+    const userAccessFilter = {
+      $or: [
+        { creatorId: req.user._id },
+        { assigneeId: req.user._id }
+      ]
+    };
+
+    const filter = [userAccessFilter];
+
+    if (status) {
+      filter.push({ status });
+    }
+
+    if (priority) {
+      filter.push({ priority });
+    }
+
+    if (dueDate) {
+      const targetDate = new Date(dueDate);
+      const startOfDay = new Date(targetDate.setHours(0, 0, 0, 0));
+      const endOfDay = new Date(targetDate.setHours(23, 59, 59, 999));
+      filter.push({ dueDate: { $gte: startOfDay, $lte: endOfDay } });
+    }
+
+    if (search) {
+      filter.push({
+        $or: [
+          { title: { $regex: search, $options: "i" } },
+          { description: { $regex: search, $options: "i" } }
+        ]
+      });
+    }
+
+    const tasks = await Task.find({ $and: filter }).lean();
+
+    const now = new Date();
     const startOfDay = new Date(now.setHours(0, 0, 0, 0));
     const startOfWeek = new Date(startOfDay);
-    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay()); // Sunday
+    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-    const tasks = await Task.find({
-      $or: [{ creatorId: req.user._id }, { assigneeId: req.user._id }],
-    }).lean();
-
-    const filtered = tasks.map(task => {
+    const result = tasks.map(task => {
       if (task.recurring && Array.isArray(task.completedDates)) {
-        const completedToday = task.completedDates.some(d => {
-          const completedDate = new Date(d);
+        const completedToday = task.completedDates.some(date => {
+          const completedDate = new Date(date);
           if (task.recurringType === "daily") {
             return completedDate.getTime() === startOfDay.getTime();
           } else if (task.recurringType === "weekly") {
@@ -68,18 +103,71 @@ router.get("/", authenticate, async (req, res) => {
       return { ...task, completedThisCycle: false };
     });
 
-   // res.json(filtered);
-   res.json(
-  filtered.map(task => ({
-    ...task,
-    id: task._id.toString(),
-  }))
-);
-
+    res.json(result.map(task => ({
+      ...task,
+      id: task._id.toString(),
+    })));
   } catch (err) {
+    console.error("GET /tasks error:", err);
     res.status(500).json({ message: "Server error", error: err.message });
   }
 });
+
+
+
+
+
+
+
+
+// router.get("/", authenticate, async (req, res) => {
+//   try {
+//     const now = new Date();
+
+//     const startOfDay = new Date(now.setHours(0, 0, 0, 0));
+//     const startOfWeek = new Date(startOfDay);
+//     startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay()); // Sunday
+//     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+//     const tasks = await Task.find({
+//       $or: [{ creatorId: req.user._id }, { assigneeId: req.user._id }],
+//     }).lean();
+
+//     const filtered = tasks.map(task => {
+//       if (task.recurring && Array.isArray(task.completedDates)) {
+//         const completedToday = task.completedDates.some(d => {
+//           const completedDate = new Date(d);
+//           if (task.recurringType === "daily") {
+//             return completedDate.getTime() === startOfDay.getTime();
+//           } else if (task.recurringType === "weekly") {
+//             return completedDate >= startOfWeek;
+//           } else if (task.recurringType === "monthly") {
+//             return (
+//               completedDate.getFullYear() === startOfMonth.getFullYear() &&
+//               completedDate.getMonth() === startOfMonth.getMonth()
+//             );
+//           }
+//           return false;
+//         });
+
+//         return { ...task, completedThisCycle: completedToday };
+//       }
+
+//       return { ...task, completedThisCycle: false };
+//     });
+
+//    // res.json(filtered);
+//    res.json(
+//   filtered.map(task => ({
+//     ...task,
+//     id: task._id.toString(),
+//   }))
+// );
+
+//   } catch (err) {
+//     res.status(500).json({ message: "Server error", error: err.message });
+//   }
+// });
 
 // Update Task (Only creator or admin/manager)
 router.put("/:id", authenticate, async (req, res) => {
