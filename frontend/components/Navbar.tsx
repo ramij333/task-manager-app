@@ -49,7 +49,7 @@ const Navbar = ({
   auth = {
     login: { title: "Login", url: "/login" },
     register: { title: "Register", url: "/register" },
-    logout: { title: "Logout", url: "/logout" },
+    logout: { title: "Logout", url: "/login" },
   },
 }: NavbarProps) => {
 
@@ -176,19 +176,20 @@ const { isLoggedIn, logout } = useAuth();
               </SheetHeader>
               <div className="flex flex-col gap-6 p-4">
                 {/* Mobile Menu Items */}
-                <a
-                  href="/create-task"
-                  className="text-sm font-medium text-gray-700 hover:text-blue-600"
-                >
-                  Create Task
-                </a>
+                
                 <a
                   href="/dashboard"
-                  className="text-sm font-medium text-gray-700 hover:text-blue-600"
+                  className="text-md font-medium text-gray-700 hover:text-blue-600"
                 >
                   Dashboard
                 </a>
-                <div className="relative">
+                <a
+            href="/users"
+            className="text-md font-medium text-gray-700 hover:text-blue-600"
+          >
+            All Users
+          </a>
+                {/* <div className="relative">
                   <Input
                     type="text"
                     placeholder="Search"
@@ -197,32 +198,22 @@ const { isLoggedIn, logout } = useAuth();
                   <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
                     🔍
                   </span>
-                </div>
+                </div> */}
                 {/* Login and Signup Links Inside the Sheet (Mobile) */}
-                {isLoggedIn ? (
-                  <a
-                    href={auth.logout.url}
-                    className="text-sm font-medium text-gray-700 hover:text-blue-600"
-                    onClick={handleLogout}
-                  >
-                    {auth.logout.title}
-                  </a>
-                ) : (
-                  <>
-                    <a
-                      href={auth.login.url}
-                      className="text-sm font-medium text-gray-700 hover:text-blue-600"
-                    >
-                      {auth.login.title}
-                    </a>
-                    <a
-                      href={auth.register.url}
-                      className="text-sm font-medium text-gray-700 hover:text-blue-600"
-                    >
-                      {auth.register.title}
-                    </a>
-                  </>
-                )}
+                 {isLoggedIn ? (
+            <Button asChild  size="sm" onClick={handleLogout}>
+              <a href={auth.logout.url}>{auth.logout.title}</a>
+            </Button>
+          ) : (
+            <>
+              <Button asChild variant="outline" size="sm">
+                <a href={auth.login.url}>{auth.login.title}</a>
+              </Button>
+              <Button asChild size="sm">
+                <a href={auth.register.url}>{auth.register.title}</a>
+              </Button>
+            </>
+          )}
               </div>
             </SheetContent>
           </Sheet>

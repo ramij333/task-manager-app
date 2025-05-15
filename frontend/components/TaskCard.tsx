@@ -51,7 +51,7 @@ export default function TaskCard({
   onComplete,
 }: TaskCardProps) {
   const { user } = useAuth();
-  const currentUserId = user._id;
+  const currentUserId = user.id;
   const currentUserRole = user.role;
 
   const {
@@ -63,6 +63,10 @@ export default function TaskCard({
     status,
     creatorId,
     assigneeId,
+    recurring,
+    recurringType,
+    completedDates,
+    completedThisCycle
   } = task;
 
   const isCreator = currentUserId === creatorId;
@@ -75,9 +79,13 @@ export default function TaskCard({
     isAdmin ||
     isManager ||
     (currentUserRole === "user" && isCreator && !assigneeId);
-  const showAssign = (isAdmin || isManager) && !assigneeId;
+  const showAssign = (isAdmin || isManager) && !assigneeId && (status !== 'completed');
   const showComplete =
-    !isCompleted && (isAdmin || isManager || isAssignee || isCreator);
+  !isCompleted &&
+  (isAdmin || isManager || isAssignee || isCreator) &&
+  (!recurring || (recurring && !completedThisCycle));
+  const showEdit = showComplete
+
 
   const isEditing = editId === id;
   const isDeleting = deleteId === id;
@@ -197,9 +205,10 @@ export default function TaskCard({
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => onEdit(id, task)}>
+                    {showEdit && 
+                    (<DropdownMenuItem onClick={() => onEdit(id, task)}>
                       Edit
-                    </DropdownMenuItem>
+                    </DropdownMenuItem>)}
                     <DropdownMenuItem onClick={() => onDelete(id)}>
                       Delete
                     </DropdownMenuItem>
@@ -223,7 +232,7 @@ export default function TaskCard({
               <div className="text-sm text-muted-foreground">
                 Due: {new Date(dueDate).toLocaleDateString()}
               </div>
-              {assigneeId && assigneeId !== creatorId && (
+              {assigneeId !== currentUserId && assigneeId !== creatorId && (
   <div className="text-sm font-medium capitalize">
     Assigned to: <span className="text-gray-700">{assigneeName}</span>
   </div>
