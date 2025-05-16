@@ -24,7 +24,12 @@ const server = http.createServer(app)
 
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3000", 
+    origin: [
+    "https://task-manager-appk999.vercel.app",
+    "http://localhost:3000"
+  ],
+  transports: ["polling", "websocket"], 
+  timeout: 10000,
     credentials: true,
   },
 });
@@ -63,12 +68,32 @@ io.on("connection", (socket) => {
 });
 
 // Middleware
+// app.use(cors({
+//   origin: [
+//     "http://localhost:3000",
+//     "https://task-manager-appk999.vercel.app"
+//   ],
+//   methods: ["GET", "POST", "PUT", "DELETE"],
+//   credentials: true
+// }));
+
+
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://task-manager-appk999.vercel.app"
+];
+
 app.use(cors({
-  origin: [
-    "http://localhost:3000",
-    "https://task-manager-appk999.vercel.app"
-  ],
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  origin: function(origin, callback) {
+    // allow requests with no origin like mobile apps or curl
+    if(!origin) return callback(null, true);
+    if(allowedOrigins.indexOf(origin) === -1){
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  methods: ["GET", "POST", "PUT", "DELETE"], 
   credentials: true
 }));
 
