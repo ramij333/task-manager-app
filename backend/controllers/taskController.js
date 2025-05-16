@@ -124,28 +124,7 @@ exports.getTasks = async (req, res) => {
 });
 
 
-    // const result = tasks.map(task => {
-    //   if (task.recurring && Array.isArray(task.completedDates)) {
-    //     const completedToday = task.completedDates.some(date => {
-    //       const completedDate = new Date(date);
-    //       if (task.recurringType === "daily") {
-    //         return completedDate.getTime() === startOfDay.getTime();
-    //       } else if (task.recurringType === "weekly") {
-    //         return completedDate >= startOfWeek;
-    //       } else if (task.recurringType === "monthly") {
-    //         return (
-    //           completedDate.getFullYear() === startOfMonth.getFullYear() &&
-    //           completedDate.getMonth() === startOfMonth.getMonth()
-    //         );
-    //       }
-    //       return false;
-    //     });
 
-    //     return { ...task, completedThisCycle: completedToday };
-    //   }
-
-    //   return { ...task, completedThisCycle: false };
-    // });
 
     res.json(result.map(task => ({
       ...task,
@@ -291,47 +270,7 @@ exports.assignTask = async (req, res) => {
 
 
 
-// exports.assignTask = async (req, res) => {
-//   try {
-//     const task = await Task.findById(req.params.id);
-//     if (!task) return res.status(404).json({ message: "Task not found" });
 
-//     const { assigneeEmail } = req.body;
-//     const normalizedEmail = assigneeEmail.toLowerCase();
-//     if (!normalizedEmail)
-//       return res.status(400).json({ message: "Assignee email is required" });
-
-//     const user = await User.findOne({ email: normalizedEmail });
-//     if (!user)
-//       return res.status(404).json({ message: "User not found with this email" });
-
-//     if (task.status === 'completed' && (task.recurring && task.completedDates.length > 0))
-//         return res.status(400).json({message: "Completed task cant be assigned"})
-
-//     task.assigneeId = user._id;
-    
-//     await task.save();
-
-//     // Only emit if creator and assignee are different
-//     const isDifferentUser = task.creatorId.toString() !== user._id.toString();
-
-//     const io = req.app.get("io");
-//     if (io && isDifferentUser) {
-//       io.to(user._id.toString()).emit("task-assigned", {
-//         taskId: task._id.toString(),
-//         title: task.title,
-//         assignedBy: req.user.email,
-//       });
-//     }
-
-//     res.json({
-//       ...task.toObject(),
-//       id: task._id.toString(),
-//     });
-//   } catch (err) {
-//     res.status(500).json({ message: "Server error", error: err.message });
-//   }
-// };
 
 
 exports.completeTask = async (req, res) => {
@@ -458,6 +397,11 @@ exports.deleteTask = async (req, res) => {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
+
+
+
+
+
 
 
 
@@ -613,3 +557,72 @@ exports.deleteTask = async (req, res) => {
 //     res.status(500).json({ message: "Server error", error: err.message });
 //   }
 // });
+
+
+
+
+    // const result = tasks.map(task => {
+    //   if (task.recurring && Array.isArray(task.completedDates)) {
+    //     const completedToday = task.completedDates.some(date => {
+    //       const completedDate = new Date(date);
+    //       if (task.recurringType === "daily") {
+    //         return completedDate.getTime() === startOfDay.getTime();
+    //       } else if (task.recurringType === "weekly") {
+    //         return completedDate >= startOfWeek;
+    //       } else if (task.recurringType === "monthly") {
+    //         return (
+    //           completedDate.getFullYear() === startOfMonth.getFullYear() &&
+    //           completedDate.getMonth() === startOfMonth.getMonth()
+    //         );
+    //       }
+    //       return false;
+    //     });
+
+    //     return { ...task, completedThisCycle: completedToday };
+    //   }
+
+    //   return { ...task, completedThisCycle: false };
+    // });
+
+
+    // exports.assignTask = async (req, res) => {
+//   try {
+//     const task = await Task.findById(req.params.id);
+//     if (!task) return res.status(404).json({ message: "Task not found" });
+
+//     const { assigneeEmail } = req.body;
+//     const normalizedEmail = assigneeEmail.toLowerCase();
+//     if (!normalizedEmail)
+//       return res.status(400).json({ message: "Assignee email is required" });
+
+//     const user = await User.findOne({ email: normalizedEmail });
+//     if (!user)
+//       return res.status(404).json({ message: "User not found with this email" });
+
+//     if (task.status === 'completed' && (task.recurring && task.completedDates.length > 0))
+//         return res.status(400).json({message: "Completed task cant be assigned"})
+
+//     task.assigneeId = user._id;
+    
+//     await task.save();
+
+//     // Only emit if creator and assignee are different
+//     const isDifferentUser = task.creatorId.toString() !== user._id.toString();
+
+//     const io = req.app.get("io");
+//     if (io && isDifferentUser) {
+//       io.to(user._id.toString()).emit("task-assigned", {
+//         taskId: task._id.toString(),
+//         title: task.title,
+//         assignedBy: req.user.email,
+//       });
+//     }
+
+//     res.json({
+//       ...task.toObject(),
+//       id: task._id.toString(),
+//     });
+//   } catch (err) {
+//     res.status(500).json({ message: "Server error", error: err.message });
+//   }
+// };

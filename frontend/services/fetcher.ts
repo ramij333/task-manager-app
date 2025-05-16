@@ -1,36 +1,5 @@
 
-// import API from "./api";
 
-// const fetcher = (url: string) => API.get(url).then(res => res.data);
-
-// export default fetcher;
-
-
-// import axios from "axios";
-// import API from "./api"; 
-
-// const fetcher = async (url: string) => {
-  
-//   try {
-//     const token = localStorage.getItem("token")
-//     const res = await API.get(url);  
-//     // const res = await axios.get(`http://localhost:5000/api${url}`, {
-//     //   headers: {
-//     //     Authorization: `Bearer ${token}`,
-//     //   },
-//     // });
-    
-//     return res.data; 
-//   } catch (error) {
-    
-//     if (axios.isAxiosError(error)) {
-//       throw new Error(error.response?.data?.message || "An error occurred");
-//     }
-//     throw new Error("An unknown error occurred");
-//   }
-// };
-
-// export default fetcher;
 
 
 const fetcher = async ({ method, url, data }: { method: string; url: string; data?: any }) => {
@@ -68,6 +37,4 @@ const fetcher = async ({ method, url, data }: { method: string; url: string; dat
   }
 };
 export default fetcher;
-
-
 

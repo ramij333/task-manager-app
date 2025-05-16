@@ -5,7 +5,6 @@ import { Toaster } from "@/components/ui/sonner";
 import { Navbar } from "@/components/Navbar";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { SocketProvider } from "@/contexts/SocketProvider";
-import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -41,7 +40,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       ><AuthProvider>
         <SocketProvider />
-        <ServiceWorkerRegister />
+        
         <div  className="sticky top-0 z-50 w-full"><Navbar /></div>
         {children}
         <Toaster expand={true} richColors  /></AuthProvider>
