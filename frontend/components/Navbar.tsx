@@ -2,10 +2,9 @@
 
 "use client"
 
-import { useState, useEffect } from "react";
-import { Menu, Users, Settings, ClipboardList } from "lucide-react";
+
+import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input"; 
 import {
   Sheet,
   SheetContent,
@@ -14,7 +13,6 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useAuth } from "@/contexts/AuthContext";
-import TaskSearchBar from "./TaskSearchBar";
 
 interface NavbarProps {
   logo?: {

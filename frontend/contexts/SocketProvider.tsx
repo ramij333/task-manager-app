@@ -9,9 +9,10 @@ export const SocketProvider = () => {
   const { user, isLoggedIn } = useAuth();
 
   useEffect(() => {
+    if (!socket) return
     if (!user?.id || !isLoggedIn) return;
 
-    socket.emit("join", user.id);
+    socket?.emit("join", user.id);
 
     // Named handlers
     const handleTaskAssigned = (data:any) => {
@@ -47,16 +48,16 @@ export const SocketProvider = () => {
     // };
 
     // Register listeners
-    socket.on("task-assigned", handleTaskAssigned);
-    socket.on("task-updated", handleTaskUpdated);
-    socket.on("task-completed", handleTaskCompleted);
+    socket?.on("task-assigned", handleTaskAssigned);
+    socket?.on("task-updated", handleTaskUpdated);
+    socket?.on("task-completed", handleTaskCompleted);
     //socket.on("task-created", handleTaskCreated);
 
     // Cleanup on unmount or deps change
     return () => {
-      socket.off("task-assigned", handleTaskAssigned);
-      socket.off("task-updated", handleTaskUpdated);
-      socket.off("task-completed", handleTaskCompleted);
+      socket?.off("task-assigned", handleTaskAssigned);
+      socket?.off("task-updated", handleTaskUpdated);
+      socket?.off("task-completed", handleTaskCompleted);
      // socket.off("task-created", handleTaskCreated);
     };
   }, [user, isLoggedIn]);

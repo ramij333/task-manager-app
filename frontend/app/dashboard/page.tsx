@@ -72,7 +72,7 @@ const { data, error, isLoading, mutate } = useSWR<Task[]>(getKey(), (url: string
     );
   }
 
-  const handleEdit = (id: string, updatedData?: Task) => {
+  const handleEdit = (id: string) => {
     if (id) {
       setEditId(id);
     } else {
@@ -110,20 +110,20 @@ const handleClearSearch = () => {
 };
 
 
-const filteredTasks = data?.filter((task) => {
-  const matchesQuery = searchQuery
-    ? task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      task.description.toLowerCase().includes(searchQuery.toLowerCase())
-    : true;
+// const filteredTasks = data?.filter((task) => {
+//   const matchesQuery = searchQuery
+//     ? task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+//       task.description.toLowerCase().includes(searchQuery.toLowerCase())
+//     : true;
 
-  const matchesFilters = filters ? (
-    (!filters.priority || task.priority === filters.priority) &&
-    (!filters.status || task.status === filters.status) &&
-    (!filters.dueDate || new Date(task.dueDate).toDateString() === new Date(filters.dueDate).toDateString())
-  ) : true;
+//   const matchesFilters = filters ? (
+//     (!filters.priority || task.priority === filters.priority) &&
+//     (!filters.status || task.status === filters.status) &&
+//     (!filters.dueDate || new Date(task.dueDate).toDateString() === new Date(filters.dueDate).toDateString())
+//   ) : true;
 
-  return matchesQuery && matchesFilters;
-});
+//   return matchesQuery && matchesFilters;
+// });
 
 
 
@@ -138,6 +138,7 @@ const handleCreateTask = async (data: TaskFormData) => {
       mutate();
       setShowForm(false);
     } catch (error) {
+      console.log(error)
       toast.error("Failed to create task");
     }
   };
@@ -194,9 +195,10 @@ const createdTasks = data?.filter((task) => {
     <div className="mb-6">
       <h2 className="text-xl font-semibold mb-3">{title}</h2>
       <div className="flex justify-center items-center w-full mx-0">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 w-full ">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 w-full grid-rows-auto">
         {tasks && tasks.length > 0 ? (
           tasks.map((task) => (
+            <div key={task.id} className="self-start">
             <TaskCard
               key={task.id}
               task={task}
@@ -206,7 +208,7 @@ const createdTasks = data?.filter((task) => {
               onEdit={handleEdit}
               onDelete={handleDelete}
               onComplete={handleComplete}
-            />
+            /></div>
           ))
         ) : (
           <div className="text-sm text-gray-500 col-span-full">No tasks.</div>
@@ -219,9 +221,9 @@ const createdTasks = data?.filter((task) => {
 
   return (
   <Protected>
-    <div className="pt-10">
+    <div className="pt-10 min-h-screen bg-gradient-to-br from-blue-100 via-white to-green-100">
        <TaskSearchBar onSearch={handleSearch} onClear={handleClearSearch} />
-      <div className="space-y-10 text-center w-full h-full grid grid-cols-1 p-4 md:px-10">
+      <div className="space-y-10 text-center w-full p-4 md:px-10">
         
         {(searchQuery || filters) ? (
           renderSection("Search Results", data)

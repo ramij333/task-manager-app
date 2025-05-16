@@ -14,7 +14,6 @@ import { cn } from "@/lib/utils";
 import { Task, Priority } from "@/types/task";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import axios from "axios";
 import TaskFormCard from "./TaskFormCard";
 import { AssignTaskFormCard } from "./AssignTaskFormCard";
 import API from "@/services/api";
@@ -64,9 +63,7 @@ export default function TaskCard({
     creatorId,
     assigneeId,
     recurring,
-    recurringType,
-    completedDates,
-    completedThisCycle
+    completedThisCycle,
   } = task;
 
   const isCreator = currentUserId === creatorId;
@@ -75,17 +72,36 @@ export default function TaskCard({
   const isManager = currentUserRole === "manager";
   const isCompleted = status === "completed";
 
-  const showMenu =
-    isAdmin ||
-    isManager ||
-    (currentUserRole === "user" && isCreator && !assigneeId);
-  const showAssign = (isAdmin || isManager) && !assigneeId && (status !== 'completed');
+ 
   const showComplete =
-  !isCompleted &&
-  (isAdmin || isManager || isAssignee || isCreator) &&
-  (!recurring || (recurring && !completedThisCycle));
-  const showEdit = showComplete
+    !isCompleted &&
+    (isAdmin || isManager || isAssignee || isCreator) &&
+    (!recurring || (recurring && !completedThisCycle));
+  
+  const showAssign = (isAdmin || isManager) && !assigneeId;
+  const showEdit = isCreator && !isCompleted;
+  const showDelete = 
+  isAdmin || 
+  (isManager && isCreator) || 
+  (currentUserRole === "user" && isCreator && !assigneeId);
+  const showMenu = showAssign || showEdit || showDelete;
+ 
 
+  // const showAssign = (isAdmin || isManager) && !assigneeId && showComplete;
+//  const showEdit =
+//   (isAdmin || isManager) &&
+//   (
+//     !isCompleted || 
+//     (isCompleted && recurring && !!assigneeId) // 
+//   ) ||
+//   (currentUserRole === "user" && isCreator && !assigneeId && !isCompleted);
+  // const showDelete = isAdmin || isManager || (isCreator && !assigneeId);
+  //  const showMenu =
+  //   (isAdmin ||
+  //   isManager ||
+  //   (currentUserRole === "user" && isCreator && !assigneeId)) && (showAssign || showEdit || showDelete);
+
+  
 
   const isEditing = editId === id;
   const isDeleting = deleteId === id;
@@ -98,7 +114,7 @@ export default function TaskCard({
         .then(() => toast.success("Task deleted"))
         .catch(() => toast.error("Failed to delete task"));
     }
-  }, [isDeleting]);
+  }, [isDeleting, id]);
 
   // Handle completion side-effect
   useEffect(() => {
@@ -119,7 +135,7 @@ export default function TaskCard({
           }
         });
     }
-  }, [isCompleting]);
+  }, [isCompleting, id]);
 
   useEffect(() => {
     if (isEditing) {
@@ -134,6 +150,7 @@ export default function TaskCard({
       toast.success("Task updated");
     } catch (err) {
       toast.error("Failed to update task");
+      console.error("Failed to update task: ", err);
     }
     setShowEditForm(false);
   };
@@ -161,13 +178,12 @@ export default function TaskCard({
         }
       } catch (err) {
         console.error("Failed to fetch user names");
+        console.error("Failed to fetch user names: ", err);
       }
     };
 
     fetchNames();
   }, [assigneeId, creatorId, isAssignee]);
-
-  
 
   return (
     <>
@@ -205,13 +221,16 @@ export default function TaskCard({
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    {showEdit && 
-                    (<DropdownMenuItem onClick={() => onEdit(id, task)}>
-                      Edit
-                    </DropdownMenuItem>)}
-                    <DropdownMenuItem onClick={() => onDelete(id)}>
-                      Delete
-                    </DropdownMenuItem>
+                    {showEdit && (
+                      <DropdownMenuItem onClick={() => onEdit(id, task)}>
+                        Edit
+                      </DropdownMenuItem>
+                    )}
+                    {showDelete && (
+                      <DropdownMenuItem onClick={() => onDelete(id)}>
+                        Delete
+                      </DropdownMenuItem>
+                    )}
                     {showAssign && (
                       <DropdownMenuItem
                         onClick={() => {
@@ -227,26 +246,25 @@ export default function TaskCard({
             </CardHeader>
 
             <CardContent className="space-y-4 flex flex-col justify-start items-start">
-              
               <p className="text-md text-gray-800">{description}</p>
               <div className="text-sm text-muted-foreground">
                 Due: {new Date(dueDate).toLocaleDateString()}
               </div>
-              {assigneeId !== currentUserId && assigneeId !== creatorId && (
-  <div className="text-sm font-medium capitalize">
-    Assigned to: <span className="text-gray-700">{assigneeName}</span>
-  </div>
-)}
+              {assigneeId &&
+                currentUserId === creatorId &&
+                assigneeId !== creatorId && (
+                  <div className="text-sm font-medium capitalize">
+                    Assigned to:{" "}
+                    <span className="text-gray-700">{assigneeName}</span>
+                  </div>
+                )}
 
-{(currentUserId === assigneeId) && (creatorId !== assigneeId) && (
-  <div className="text-sm font-medium capitalize">
-    Assigned by: <span className="text-gray-700">{creatorName}</span>
-  </div>
-)}
-
-
-
-
+              {currentUserId === assigneeId && creatorId !== assigneeId && (
+                <div className="text-sm font-medium capitalize">
+                  Assigned by:{" "}
+                  <span className="text-gray-700">{creatorName}</span>
+                </div>
+              )}
 
               <div className="text-sm font-medium capitalize">
                 Priority:{" "}
@@ -259,18 +277,31 @@ export default function TaskCard({
                   {priority}
                 </span>
               </div>
-              <div className="text-sm font-medium capitalize">
-                Status:{" "}
-                <span
-                  className={cn(
-                    "px-2 py-1 rounded-full",
-                    status === "completed"
-                      ? "bg-green-100 text-green-700"
-                      : "bg-yellow-100 text-yellow-700"
+              <div className="flex flex-row justify-center items-center gap-3">
+                <div className="text-sm font-medium capitalize">
+                  Status:{" "}
+                  <span
+                    className={cn(
+                      "px-2 py-1 rounded-full",
+                      status === "completed"
+                        ? "bg-green-100 text-green-700"
+                        : "bg-yellow-100 text-yellow-700"
+                    )}
+                  >
+                    {status}
+                  </span>{" "}
+                  {recurring && (
+                    <span
+                      className={cn(
+                        "px-2 py-1 rounded-full",
+                        "bg-purple-100 text-purple-700"
+                      )}
+                    >
+                      {" "}
+                      Recucrring{" "}
+                    </span>
                   )}
-                >
-                  {status}
-                </span>
+                </div>
               </div>
               {showComplete && (
                 <div className="w-full flex justify-center items-center">

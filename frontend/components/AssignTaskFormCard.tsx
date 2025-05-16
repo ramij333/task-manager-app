@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import axios from 'axios';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -48,6 +47,7 @@ export const AssignTaskFormCard: React.FC<AssignTaskFormCardProps> = ({
     toast.success(`Task successfully assigned to ${data.email}`);
     onClose();
   } catch (error: any) {
+    console.error("Failed to assign task: ", error)
     toast.error("Failed to assign task");
   } finally {
     setLoading(false);

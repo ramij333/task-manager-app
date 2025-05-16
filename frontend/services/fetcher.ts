@@ -35,6 +35,9 @@
 
 const fetcher = async ({ method, url, data }: { method: string; url: string; data?: any }) => {
   try {
+    if (typeof window === "undefined") {
+      throw new Error("Cannot access localStorage on the server.");
+    }
     const token = localStorage.getItem("token");
     
     // Check if token exists

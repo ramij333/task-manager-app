@@ -2,7 +2,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import API from "@/services/api";
+
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
@@ -24,12 +24,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     // This runs only on client
-    const storedUser = localStorage.getItem("user");
+    if (typeof window !== "undefined") {
+      const storedUser = localStorage.getItem("user");
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     } else {
       setUser(null);
     }
+    }
+    
     setLoading(false);
     setIsMounted(true);
   }, []);
@@ -37,7 +40,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const login = (userData: any) => {
    
   const parsedUser = typeof userData === "string" ? JSON.parse(userData) : userData;
-  localStorage.setItem("user", JSON.stringify(parsedUser));
+  if (typeof window !== "undefined") {localStorage.setItem("user", JSON.stringify(parsedUser));}
+  
   setUser(parsedUser);
  
 };
@@ -47,7 +51,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // try {
     //   await API.post("/auth/logout");
     // } catch {}
-    localStorage.removeItem("user");
+    if (typeof window !== "undefined") {localStorage.removeItem("user");}
+    
     setUser(null);
     router.push("/");
     toast.success("Logout successful");

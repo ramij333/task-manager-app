@@ -80,28 +80,72 @@ exports.getTasks = async (req, res) => {
     startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
+
     const result = tasks.map(task => {
-      if (task.recurring && Array.isArray(task.completedDates)) {
-        const completedToday = task.completedDates.some(date => {
-          const completedDate = new Date(date);
-          if (task.recurringType === "daily") {
-            return completedDate.getTime() === startOfDay.getTime();
-          } else if (task.recurringType === "weekly") {
-            return completedDate >= startOfWeek;
-          } else if (task.recurringType === "monthly") {
-            return (
-              completedDate.getFullYear() === startOfMonth.getFullYear() &&
-              completedDate.getMonth() === startOfMonth.getMonth()
-            );
-          }
-          return false;
-        });
+  let completedToday = false;
+  const dueDate = new Date(task.dueDate);
+  const normalizedDue = new Date(dueDate.setHours(0, 0, 0, 0));
 
-        return { ...task, completedThisCycle: completedToday };
-      }
+  if (task.recurring && Array.isArray(task.completedDates)) {
+    const today = new Date();
+    const normalizedToday = new Date(today.setHours(0, 0, 0, 0));
 
-      return { ...task, completedThisCycle: false };
-    });
+    if (task.recurringType === "daily") {
+      completedToday = task.completedDates.some(date => {
+        const completedDate = new Date(date).setHours(0, 0, 0, 0);
+        return completedDate === normalizedToday.getTime();
+      });
+    } else if (task.recurringType === "weekly") {
+      const startOfWeek = new Date(normalizedToday);
+      startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+      completedToday = task.completedDates.some(date => {
+        const completedDate = new Date(date);
+        return completedDate >= startOfWeek;
+      });
+    } else if (task.recurringType === "monthly") {
+      const startOfMonth = new Date(normalizedToday.getFullYear(), normalizedToday.getMonth(), 1);
+      completedToday = task.completedDates.some(date => {
+        const completedDate = new Date(date);
+        return (
+          completedDate.getFullYear() === startOfMonth.getFullYear() &&
+          completedDate.getMonth() === startOfMonth.getMonth()
+        );
+      });
+    }
+
+    if (!completedToday && normalizedToday.getTime() === normalizedDue.getTime()) {
+      task.status = "pending";
+    }
+
+    return { ...task, completedThisCycle: completedToday };
+  }
+
+  return { ...task, completedThisCycle: false };
+});
+
+
+    // const result = tasks.map(task => {
+    //   if (task.recurring && Array.isArray(task.completedDates)) {
+    //     const completedToday = task.completedDates.some(date => {
+    //       const completedDate = new Date(date);
+    //       if (task.recurringType === "daily") {
+    //         return completedDate.getTime() === startOfDay.getTime();
+    //       } else if (task.recurringType === "weekly") {
+    //         return completedDate >= startOfWeek;
+    //       } else if (task.recurringType === "monthly") {
+    //         return (
+    //           completedDate.getFullYear() === startOfMonth.getFullYear() &&
+    //           completedDate.getMonth() === startOfMonth.getMonth()
+    //         );
+    //       }
+    //       return false;
+    //     });
+
+    //     return { ...task, completedThisCycle: completedToday };
+    //   }
+
+    //   return { ...task, completedThisCycle: false };
+    // });
 
     res.json(result.map(task => ({
       ...task,
@@ -186,30 +230,44 @@ exports.updateTask = async (req, res) => {
 };
 
 
+
+
 exports.assignTask = async (req, res) => {
   try {
     const task = await Task.findById(req.params.id);
     if (!task) return res.status(404).json({ message: "Task not found" });
 
+    // 1. Block assigning already assigned task
+    if (task.assigneeId) {
+      return res.status(400).json({ message: "Task is already assigned and cannot be reassigned" });
+    }
+
+    // 2. Block assigning completed tasks (regardless of recurring type)
+    if (task.status === "completed") {
+      return res.status(400).json({ message: "Completed task cannot be assigned" });
+    }
+
     const { assigneeEmail } = req.body;
-    const normalizedEmail = assigneeEmail.toLowerCase();
-    if (!normalizedEmail)
+    if (!assigneeEmail) {
       return res.status(400).json({ message: "Assignee email is required" });
+    }
 
-    const user = await User.findOne({ email: normalizedEmail });
-    if (!user)
+    const normalizedEmail = assigneeEmail.toLowerCase();
+    const user = await User.findOne({ email: normalizedEmail }); // ✅ Declare before using
+
+    if (!user) {
       return res.status(404).json({ message: "User not found with this email" });
+    }
 
-    if (task.status === 'completed' && (task.recurring && task.completedDates.length > 0))
-        return res.status(400).json({message: "Completed task cant be assigned"})
+    // 3. Prevent assigning task to yourself
+    if (user._id.toString() === req.user._id.toString()) {
+      return res.status(400).json({ message: "You cannot assign a task to yourself" });
+    }
 
     task.assigneeId = user._id;
-    
     await task.save();
 
-    // Only emit if creator and assignee are different
     const isDifferentUser = task.creatorId.toString() !== user._id.toString();
-
     const io = req.app.get("io");
     if (io && isDifferentUser) {
       io.to(user._id.toString()).emit("task-assigned", {
@@ -223,10 +281,57 @@ exports.assignTask = async (req, res) => {
       ...task.toObject(),
       id: task._id.toString(),
     });
+
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
+
+
+
+
+
+// exports.assignTask = async (req, res) => {
+//   try {
+//     const task = await Task.findById(req.params.id);
+//     if (!task) return res.status(404).json({ message: "Task not found" });
+
+//     const { assigneeEmail } = req.body;
+//     const normalizedEmail = assigneeEmail.toLowerCase();
+//     if (!normalizedEmail)
+//       return res.status(400).json({ message: "Assignee email is required" });
+
+//     const user = await User.findOne({ email: normalizedEmail });
+//     if (!user)
+//       return res.status(404).json({ message: "User not found with this email" });
+
+//     if (task.status === 'completed' && (task.recurring && task.completedDates.length > 0))
+//         return res.status(400).json({message: "Completed task cant be assigned"})
+
+//     task.assigneeId = user._id;
+    
+//     await task.save();
+
+//     // Only emit if creator and assignee are different
+//     const isDifferentUser = task.creatorId.toString() !== user._id.toString();
+
+//     const io = req.app.get("io");
+//     if (io && isDifferentUser) {
+//       io.to(user._id.toString()).emit("task-assigned", {
+//         taskId: task._id.toString(),
+//         title: task.title,
+//         assignedBy: req.user.email,
+//       });
+//     }
+
+//     res.json({
+//       ...task.toObject(),
+//       id: task._id.toString(),
+//     });
+//   } catch (err) {
+//     res.status(500).json({ message: "Server error", error: err.message });
+//   }
+// };
 
 
 exports.completeTask = async (req, res) => {
@@ -273,24 +378,22 @@ exports.completeTask = async (req, res) => {
     // Add today's completion
     task.completedDates = task.completedDates || [];
     task.completedDates.push(normalizedToday);
-
+    task.status = "completed";
     // Mark non-recurring tasks as fully completed
-    if (!task.recurring) {
-      task.status = "completed";
-    } else {
-      // Optional: update the dueDate to the next recurring date
+    if (task.recurring) {
       const currentDue = new Date(task.dueDate);
-      let nextDue = new Date(currentDue);
+      const baseDate = normalizedToday > currentDue ? normalizedToday : currentDue;
+      let nextDue = new Date(currentDue.getTime());
 
       switch (task.recurringType) {
         case "daily":
-          nextDue.setDate(currentDue.getDate() + 1);
+          nextDue.setDate(baseDate.getDate() + 1); //currentdue.getDate()
           break;
         case "weekly":
-          nextDue.setDate(currentDue.getDate() + 7);
+          nextDue.setDate(baseDate.getDate() + 7);
           break;
         case "monthly":
-          nextDue.setMonth(currentDue.getMonth() + 1);
+          nextDue.setMonth(baseDate.getMonth() + 1);
           break;
         default:
           // If recurringType is invalid or missing
@@ -323,28 +426,63 @@ exports.completeTask = async (req, res) => {
   }
 }
 
+
 exports.deleteTask = async (req, res) => {
   try {
     const task = await Task.findById(req.params.id);
 
     if (!task) return res.status(404).json({ message: "Task not found" });
 
-    const isCreator = task.creatorId.toString() === req.user._id.toString();
-    const isAdminOrManager = ["admin", "manager"].includes(req.user.role);
+    const userId = req.user._id.toString();
+    const isCreator = task.creatorId.toString() === userId;
+    const isAssignee = task.assigneeId?.toString() === userId;
+    const isAdmin = req.user.role === "admin";
+    const isManager = req.user.role === "manager";
 
-    // Prevent regular users from deleting tasks assigned to them
-    if (!isCreator && !isAdminOrManager) {
-      return res.status(403).json({
-        message: "Forbidden: You can only delete tasks you created or if you're an admin/manager",
-      });
+    if (isAdmin) {
+      // Admin can delete any task
+      await task.deleteOne();
+      return res.json({ message: "Task deleted" });
     }
 
-    await Task.findByIdAndDelete(req.params.id);
-    res.json({ message: "Task deleted" });
+    if (isCreator && !isAssignee) {
+      // Manager or Regular User can delete their own created task only if it's not assigned to them
+      await task.deleteOne();
+      return res.json({ message: "Task deleted" });
+    }
+
+    return res.status(403).json({
+      message: "Forbidden: You can only delete tasks you created (not assigned ones), unless you're an admin.",
+    });
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
   }
-}
+};
+
+
+
+// exports.deleteTask = async (req, res) => {
+//   try {
+//     const task = await Task.findById(req.params.id);
+
+//     if (!task) return res.status(404).json({ message: "Task not found" });
+
+//     const isCreator = task.creatorId.toString() === req.user._id.toString();
+//     const isAdminOrManager = ["admin", "manager"].includes(req.user.role);
+
+//     // Prevent regular users from deleting tasks assigned to them
+//     if (!isCreator && !isAdminOrManager) {
+//       return res.status(403).json({
+//         message: "Forbidden: You can only delete tasks you created or if you're an admin/manager",
+//       });
+//     }
+
+//     await Task.findByIdAndDelete(req.params.id);
+//     res.json({ message: "Task deleted" });
+//   } catch (err) {
+//     res.status(500).json({ message: "Server error", error: err.message });
+//   }
+// }
 
 
 

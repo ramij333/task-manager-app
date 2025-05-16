@@ -55,6 +55,7 @@ export default function UsersPage() {
       toast.success(`${res.data.user.name} is now a ${res.data.user.role}`)
       fetchUsers() // Refresh the list
     } catch (error: any) {
+      console.error("Something went wrong:", error)
       toast.error( "Something went wrong")
     }
   }

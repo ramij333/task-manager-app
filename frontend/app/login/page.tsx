@@ -27,7 +27,8 @@ export default function Login() {
   const onSubmit = async (data: LoginSchema) => {
     try {
       const res = await API.post("/auth/login", data);
-      localStorage.setItem("token", res.data.token);
+      if (typeof window !== 'undefined') {
+      localStorage.setItem("token", res.data.token);}
       login(JSON.stringify(res.data.user));
       toast.success('Login successfull.')
       router.push("/");
@@ -37,8 +38,8 @@ export default function Login() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-md sm:max-w-lg p-6 sm:p-8 shadow-xl rounded-2xl">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-100 via-white to-green-100 px-4 sm:px-6 lg:px-8">
+      <Card className="w-full max-w-md sm:max-w-lg p-6 sm:p-8 shadow-xl rounded-2xl bg-white/10 backdrop-blur-md border border-white/20">
         <CardHeader>
           <CardTitle className="text-center text-2xl sm:text-3xl font-semibold">
             Welcome Back

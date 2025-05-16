@@ -6,6 +6,8 @@ const cookieParser = require("cookie-parser")
 const { Server } = require("socket.io")
 const http = require("http"); 
 const jwt = require("jsonwebtoken");
+// const helmet = require("helmet");
+// const rateLimit = require("express-rate-limit");
 
 
 
@@ -68,6 +70,15 @@ app.use(cors({
 }));
 app.use(cookieParser())
 app.use(express.json());
+
+
+
+// app.use(helmet());
+// app.use(rateLimit({
+//   windowMs: 15 * 60 * 1000, // 15 min
+//   max: 100, // max requests per IP
+// }));
+
 
 app.get("/api/test", (req, res) => {
   res.json({ message: "Hello from backend" });

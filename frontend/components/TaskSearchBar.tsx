@@ -7,7 +7,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon, Filter } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 const priorities = ["low", "medium", "high"];
 const statuses = ["pending", "completed"];

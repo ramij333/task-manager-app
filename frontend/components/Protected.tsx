@@ -13,7 +13,7 @@ export default function Protected({ children }: { children: React.ReactNode }) {
     if (!loading && !user) {
       router.push("/login");
     }
-  }, [user, loading]);
+  }, [user, loading, router]);
 
   if (loading || !user) return <p><ClipLoader color="#3b82f6" size={35} loading={true} /></p>;
 
