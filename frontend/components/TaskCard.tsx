@@ -78,7 +78,7 @@ export default function TaskCard({
     (isAdmin || isManager || isAssignee || isCreator) &&
     (!recurring || (recurring && !completedThisCycle));
   
-  const showAssign = (isAdmin || isManager) && !assigneeId;
+  const showAssign = (isAdmin || isManager) && !assigneeId && !isCompleted;
   const showEdit = isCreator && !isCompleted;
   const showDelete = 
   isAdmin || 

@@ -26,6 +26,7 @@ import API from "@/services/api"
 import { useAuth } from "@/contexts/AuthContext"
 import { toast } from "sonner"
 import Protected from "@/components/Protected"
+import { useRouter } from "next/navigation"
 
 type User = {
   _id: string
@@ -36,9 +37,16 @@ type User = {
 
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([])
+  const router = useRouter();
   const { user } = useAuth()
 
   const currentUserRole = user?.role
+
+   useEffect(() => {
+    if (!user) {
+      router.push("/login"); 
+    }
+  }, [user, router]);
 
   const fetchUsers = async () => {
     try {

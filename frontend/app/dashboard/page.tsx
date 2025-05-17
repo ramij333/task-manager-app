@@ -3,7 +3,7 @@
 "use client";
 
 import useSWR from "swr";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Task } from "@/types/task";
 import TaskCard from "@/components/TaskCard";
 import { useAuth } from "@/contexts/AuthContext";
@@ -13,6 +13,7 @@ import API from "@/services/api";
 import TaskFormCard from "@/components/TaskFormCard";
 import Protected from "@/components/Protected";
 import TaskSearchBar from "@/components/TaskSearchBar";
+import { useRouter } from "next/navigation"; 
 
 
 type TaskFormData = {
@@ -32,6 +33,7 @@ export default function Dashboard() {
  const [showForm, setShowForm] = useState<boolean>(false);
  const [searchQuery, setSearchQuery] = useState<string>("");
 const [filters, setFilters] = useState<any>(null); 
+  const router = useRouter();
   const { user } = useAuth();
  
   const currentUserId = user?.id;
@@ -51,9 +53,24 @@ const { data, error, isLoading, mutate } = useSWR<Task[]>(getKey(), (url: string
   API.get(url).then((res) => res.data)
 );
 
+ useEffect(() => {
+    if (!user) {
+      router.push("/login"); 
+    }
+  }, [user, router]);
 
-
-
+useEffect(() => {
+  if (showForm) {
+    
+    document.body.style.overflow = "hidden";
+  } else {
+    
+    document.body.style.overflow = "";
+  }
+  return () => {
+    document.body.style.overflow = "";
+  };
+}, [showForm]);
 
 
   if (isLoading) {
@@ -181,7 +198,7 @@ const createdTasks = data?.filter((task) => {
     <div className="mb-6">
       <h2 className="text-xl font-semibold mb-3">{title}</h2>
       <div className="flex justify-center items-center w-full mx-0">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 w-full grid-rows-auto">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 w-full ">
         {tasks && tasks.length > 0 ? (
           tasks.map((task) => (
             <div key={task.id} className="self-start">
@@ -207,7 +224,7 @@ const createdTasks = data?.filter((task) => {
 
   return (
   <Protected>
-    <div className="pt-10 min-h-screen bg-gradient-to-br from-blue-100 via-white to-green-100">
+    <div className="pt-10 min-h-screen bg-gradient-to-br from-blue-100 via-white to-green-100 md:pb-10 pb-20">
        <TaskSearchBar onSearch={handleSearch} onClear={handleClearSearch} />
       <div className="space-y-10 text-center w-full p-4 md:px-10">
         
@@ -223,21 +240,24 @@ const createdTasks = data?.filter((task) => {
         )}
 
         {/* Floating Create Task Button */}
+        {!showForm && (
         <button
           onClick={() => setShowForm(true)}
           className="fixed bottom-6 right-6 md:bottom-20 md:right-20 bg-orange-600 hover:bg-red-700 text-white p-4 rounded-full shadow-lg z-50"
         >
           <Plus className="w-6 h-6" />
-        </button>
+        </button>)}
 
         {/* Create Task Modal */}
         {showForm && (
           <div className="fixed inset-0 z-40 bg-black/50 flex items-center justify-center">
+          {/* <div className="fixed mx-4 md:mx-auto inset-0 z-40 bg-black/50 flex items-center justify-center"> */}
+           <div className="mx-4 w-full max-w-xl">
             <TaskFormCard
               onSubmit={handleCreateTask}
               onCancel={() => setShowForm(false)}
             />
-          </div>
+          </div></div>
         )}
       </div>
     </div>
