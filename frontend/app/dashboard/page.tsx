@@ -224,7 +224,8 @@ const createdTasks = data?.filter((task) => {
 
   return (
   <Protected>
-    <div className="pt-10 min-h-screen bg-gradient-to-br from-blue-100 via-white to-green-100 md:pb-10 pb-20">
+    <div className="pt-10 min-h-screen bg-gradient-to-br from-purple-100 via-blue-100 to-white
+ md:pb-10 pb-20">
        <TaskSearchBar onSearch={handleSearch} onClear={handleClearSearch} />
       <div className="space-y-10 text-center w-full p-4 md:px-10">
         

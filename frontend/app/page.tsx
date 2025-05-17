@@ -6,26 +6,10 @@ import { Button } from "@/components/ui/button";
 
 export default function HomePage() {
   const router = useRouter();
-  // const [token, setToken] = useState<string | null>(null);
 
-  // useEffect(() => {
-  //   if (typeof window !== "undefined") {
-  //   const storedToken = localStorage.getItem("token");
-  //   setToken(storedToken);
-  // }
-  // }, []);
-
-  // const handleCreateTask = () => {
-  //   if (!token) {
-  //     toast.error("Please login to create tasks");
-  //     router.push("/login");
-  //   } else {
-  //     router.push("/tasks/create");
-  //   }
-  // };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-green-100 px-4 py-10 flex flex-col items-center">
+    <main className="min-h-screen bg-gradient-to-br from-purple-100 via-blue-100 to-white px-4 py-10 flex flex-col items-center">
       {/* Hero Section */}
       <section className="text-center max-w-4xl mb-16">
         <h1 className="text-5xl sm:text-6xl font-bold text-gray-800 leading-tight">

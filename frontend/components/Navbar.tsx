@@ -121,18 +121,7 @@ const { isLoggedIn, logout } = useAuth();
           >
             All Users
           </a>
-          {/* <div className="relative">
-
-            
-            <Input
-              type="text"
-              placeholder="Search"
-              className="pl-10 pr-4 py-2 bg-white/30"
-            />
-            <span className="absolute  left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-              🔍
-            </span>
-          </div> */}
+          
         </div>
 
         {/* Right: Conditional Buttons (Login, Sign Up, Logout) */}
@@ -187,17 +176,7 @@ const { isLoggedIn, logout } = useAuth();
           >
             All Users
           </a>
-                {/* <div className="relative">
-                  <Input
-                    type="text"
-                    placeholder="Search"
-                    className="pl-10 pr-4 py-2"
-                  />
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-                    🔍
-                  </span>
-                </div> */}
-                {/* Login and Signup Links Inside the Sheet (Mobile) */}
+                
                  {isLoggedIn ? (
             <Button asChild  size="sm" onClick={handleLogout}>
               <a href={auth.logout.url}>{auth.logout.title}</a>
